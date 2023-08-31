@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: django_spanglish_api
+    # working_dir: /app
+    volumes:
+      - ".:/app"
+    ports:
+      - 8004:80
+    # command: tail -f /dev/null
+    command: python manage.py runserver 0.0.0.0:80 
+    depends_on:
+      - postgresql
+      - redis
+    networks:
+      - network-django      
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT}
+      - TESTING=0
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+    links:
+      - postgresql
+  postgresql:
+    container_name: postgresql-spanglish-api
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - type: volume
+        source: db-data
+        target: /var/lib/postgresql/data
+    networks:
+      network-django:
+        ipv4_address: ${POSTGRES_HOST}
+  pgadmin:
+    container_name: pgadmin-django
+    image: dpage/pgadmin4:latest
+    restart: always
+    networks:
+      - network-django
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
+    ports:
+      - "8084:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    links:
+      - "postgresql:pgsql-server"      
+  redis:
+    container_name: django_redis
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6384:6379"
+    volumes:
+      - "django-redis:/data"
+volumes:
+    app: {}
+    db-data: {}
+    pgadmin-data: {}
+    django-redis: {}    
+networks:
+    network-django:
+      ipam:
+        driver: default
+        config:
+          - subnet: 171.24.0.0/16
