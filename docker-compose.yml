@@ -1,23 +1,21 @@
 version: '3.8'
 
 services:
-  django:
+  fedal:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: django_spanglish_api
-    # working_dir: /app
+    container_name: fedal_api
     volumes:
       - ".:/app"
     ports:
       - 8004:80
-    # command: tail -f /dev/null
     command: python manage.py runserver 0.0.0.0:80 
     depends_on:
       - postgresql
       - redis
     networks:
-      - network-django      
+      - fedal_network      
     environment:
       - ENVIRONMENT=${ENVIRONMENT}
       - TESTING=0
@@ -29,7 +27,7 @@ services:
     links:
       - postgresql
   postgresql:
-    container_name: postgresql-spanglish-api
+    container_name: fedal_postgresql-api
     image: postgres:latest
     restart: always
     ports:
@@ -43,39 +41,39 @@ services:
         source: db-data
         target: /var/lib/postgresql/data
     networks:
-      network-django:
+      fedal_network:
         ipv4_address: ${POSTGRES_HOST}
   pgadmin:
-    container_name: pgadmin-django
-    image: dpage/pgadmin4:latest
+    container_name: fedal_pgadmin
+    image: dpage/pgadmin4:7
     restart: always
     networks:
-      - network-django
+      - fedal_network
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
     ports:
-      - "8084:80"
+      - "8084:84"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     links:
       - "postgresql:pgsql-server"      
   redis:
-    container_name: django_redis
+    container_name: fedal_redis
     image: redis:alpine
     restart: always
     ports:
       - "6384:6379"
     volumes:
-      - "django-redis:/data"
+      - "fedal-redis:/data"
 volumes:
     app: {}
     db-data: {}
     pgadmin-data: {}
-    django-redis: {}    
+    fedal-redis: {}    
 networks:
-    network-django:
+    fedal_network:
       ipam:
         driver: default
         config:
