@@ -19,14 +19,9 @@ from rest_framework_simplejwt import views as jwt_views
 # from rest_framework.schemas import get_schema_view
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-# schema_view = get_schema_view(
-#     title='Fedal.nl API',
-#     version='1.0.0',
-#     description='API for the Fedal.nl website',
-# )
-
 urlpatterns = [
     # API Schema:
+    path('accounts/', include('django.contrib.auth.urls')),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
     path('schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

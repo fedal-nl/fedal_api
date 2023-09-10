@@ -84,6 +84,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': (
+        # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
 }
 
 SPECTACULAR_SETTINGS = {
@@ -133,10 +138,8 @@ LOGGING = {
     "version": 1,
     "handlers": {
         "console": {
-            # logging handler that outputs log messages to terminal
             "class": "logging.StreamHandler",
-            "level": "DEBUG",  # message level to be written to console
-            # "level": "WARNING",  # message level to be written to console
+            "level": "DEBUG",
             "formatter": "simple",
         },
     },
@@ -185,6 +188,11 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
+
+# Account templates
+LOGIN_REDIRECT_URL = '/admin/'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+APPEND_SLASH = False
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = "/app/shared/static/"
