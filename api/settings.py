@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g#kxet+q%xt^f4-5-mb!v=8uy0ode3a54b(txs2tpiq3un81_9'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
@@ -112,6 +113,18 @@ DATABASES = {
         'PORT': os.environ.get("POSTGRES_PORT", ""),
     }
 }
+
+# CELERY SETTINGS
+
+
+# set the celery broker url 
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+  
+# set the celery result backend 
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+  
+# set the celery timezone 
+CELERY_TIMEZONE = 'UTC'
 
 
 # Password validation
