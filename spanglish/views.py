@@ -1,6 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.http import Http404
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.views.generic import ListView
+from django.views.generic.edit import FormView
+from django.shortcuts import redirect
 from spanglish.models import Language, Category, Word, Sentence, Translation, VerbTense, Verb
 from spanglish.serializers import (
     LanguageSerializer,
@@ -11,7 +17,25 @@ from spanglish.serializers import (
     VerbTenseSerializer,
     VerbSerializer
 )
-from django.http import Http404
+from .form import GenerateRandomUserForm
+from .task import create_random_user_accounts
+
+
+# returns a list of generated user accounts
+class UsersListView(ListView):
+    template_name = 'spanglish/user_list.html'
+    model = User
+
+# A page with the form where we can input the number of accounts to generate
+class GenerateRandomUserView(FormView):
+    template_name = 'spanglish/generate_random_user.html'
+    form_class = GenerateRandomUserForm
+
+    def form_valid(self, form):
+        total = form.cleaned_data.get('total')
+        create_random_user_accounts.delay(total)
+        messages.success(self.request, 'We are generating your random users! Wait a moment and refresh this page.')
+        return redirect('spanglish:users_list')
 
 
 class LanguageListView(APIView):

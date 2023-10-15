@@ -24,8 +24,79 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
       - POSTGRES_DB=${POSTGRES_DB}
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
     links:
       - postgresql
+      - redis
+    env_file:
+      - .env
+  celery:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    command: celery -A api worker --loglevel debug --queues celery --concurrency 8
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=${CELERY_SECRET_KEY}
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    links:
+      - redis
+      - postgresql
+    depends_on: 
+      - fedal
+      - redis
+      - postgresql
+    networks:
+      - fedal_network
+    env_file:
+      - .env 
+  celery_beat:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    command: celery -A api beat -l DEBUG --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=${CELERY_SECRET_KEY}
+      - DJANGO_ALLOWED_HOSTS=localhost
+    links:
+      - celery
+      - postgresql
+    depends_on: 
+      - celery
+      - redis
+      - postgresql
+    networks:
+      - fedal_network
+    env_file:
+      - .env
+  flower:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: fedal_flower
+    volumes:
+      - .:/app
+    command: celery -A api --broker=redis://redis:6379 flower
+    ports:
+      - 5554:5555
+    links:
+      - celery
+      - redis
+    depends_on:
+      - celery
+      - redis
+    networks:
+      - fedal_network
+    env_file:
+      - .env      
   postgresql:
     container_name: fedal_postgresql-api
     image: postgres:latest
@@ -58,15 +129,30 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     links:
-      - "postgresql:pgsql-server"      
+      - "postgresql:pgsql-server"
   redis:
     container_name: fedal_redis
     image: redis:alpine
     restart: always
+    networks:
+      - fedal_network    
     ports:
-      - "6384:6379"
+      - "6378:6379"
     volumes:
       - "fedal-redis:/data"
+  redis-commander:
+    container_name: fedal_redis-commander
+    image: rediscommander/redis-commander:latest
+    networks:
+      - fedal_network
+    environment:
+      REDIS_HOSTS: redis
+    ports:
+      - 8081:8081
+    depends_on:
+      - redis
+    links:
+      - redis
 volumes:
     app: {}
     db-data: {}

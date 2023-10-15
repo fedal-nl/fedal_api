@@ -17,4 +17,6 @@ urlpatterns = [
     path("verb/<int:pk>/detail/", views.VerbDetailView.as_view(), name="verb-detail"),
     path("verbtense/", views.VerbTenseListView.as_view(), name="verbtense-list"),
     path("verbtense/<int:pk>/detail/", views.VerbTenseDetailView.as_view(), name="verbtense-detail"),
+    path("users/", views.UsersListView.as_view(), name='users_list'),
+    path("generate/", views.GenerateRandomUserView.as_view(), name='generate')
 ]

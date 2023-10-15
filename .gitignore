@@ -157,3 +157,4 @@ shared/
 # User-specific stuff should be kept in a separate file:
 schema.yml
 required_django_commands.txt
+startup.sh
