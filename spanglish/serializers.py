@@ -1,6 +1,6 @@
 import logging
 from rest_framework import serializers
-from spanglish.models import Language, Category, Word, Sentence, Translation, VerbTense, Verb
+from spanglish.models import Language, Category, Word, Sentence, Translation, Verb
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +28,6 @@ class TranslationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Translation
         fields = ['id', 'word', 'sentence', 'language', 'translation', 'added_at']
-
-class VerbTenseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VerbTense
-        fields = ['id', 'name']
 
 class VerbSerializer(serializers.ModelSerializer):
     class Meta:

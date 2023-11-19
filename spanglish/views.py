@@ -7,14 +7,13 @@ from django.contrib import messages
 from django.views.generic import ListView
 from django.views.generic.edit import FormView
 from django.shortcuts import redirect
-from spanglish.models import Language, Category, Word, Sentence, Translation, VerbTense, Verb
+from spanglish.models import Language, Category, Word, Sentence, Translation, Verb
 from spanglish.serializers import (
     LanguageSerializer,
     CategorySerializer,
     WordSerializer,
     SentenceSerializer,
     TranslationSerializer,
-    VerbTenseSerializer,
     VerbSerializer
 )
 from .form import GenerateRandomUserForm
@@ -342,67 +341,6 @@ class TranslationDetailView(APIView):
         translation.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class VerbTenseListView(APIView):
-    """
-    List all verb tenses, or create a new verb tense.
-    """
-
-    serializer_class = VerbTenseSerializer
-
-    def get(self, request, format=None):
-        verb_tenses = VerbTense.objects.all()
-        serializer = VerbTenseSerializer(verb_tenses, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = VerbTenseSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-class VerbTenseDetailView(APIView):
-    """
-    Retrieve, update or delete a verb tense instance.
-    """
-
-    serializer_class = VerbTenseSerializer
-
-    def get_object(self, pk):
-        try:
-            return VerbTense.objects.get(pk=pk)
-        except VerbTense.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        verb_tense = self.get_object(pk)
-        serializer = VerbTenseSerializer(verb_tense)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        verb_tense = self.get_object(pk)
-        serializer = VerbTenseSerializer(verb_tense, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    def delete(self, request, pk, format=None):
-        verb_tense = self.get_object(pk)
-        verb_tense.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class VerbListView(APIView):
     """
