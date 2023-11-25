@@ -76,6 +76,7 @@ class Verb(models.Model):
     class Meta:
         unique_together = (('tense', 'word'),)
 
+
     def __str__(self):
         return f"{self.word}"
 

@@ -38,16 +38,27 @@ class SentenceFactory(DjangoModelFactory):
     class Meta:
         model = Sentence
 
-class TranslationFactory(DjangoModelFactory):
-    """Creates a TranslationFactory object with all possible fields populated."""
+class TranslationWordFactory(DjangoModelFactory):
+    """Creates a TranslationFactory object with all possible fields populated except sentence."""
 
     word = factory.SubFactory(WordFactory)
+    language = factory.SubFactory(LanguageFactory)
+    translation = factory.Faker("sentence")
+
+    class Meta:
+        model = Translation
+
+
+class TranslationSentenceFactory(DjangoModelFactory):
+    """Creates a TranslationFactory object with all possible fields populated except word."""
+
     sentence = factory.SubFactory(SentenceFactory)
     language = factory.SubFactory(LanguageFactory)
     translation = factory.Faker("sentence")
 
     class Meta:
         model = Translation
+
 
 class VerbFactory(DjangoModelFactory):
     """Creates a VerbFactory object with all possible fields populated."""

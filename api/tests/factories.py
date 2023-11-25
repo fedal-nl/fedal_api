@@ -6,11 +6,10 @@ from django.contrib.auth.models import Group
 User = get_user_model()
 
 class GroupFactory(DjangoModelFactory):
+    name = "test_group"
     class Meta:
         model = Group
         django_get_or_create = ("name",)
-
-    name = "test_group"
 
 class UserFactory(DjangoModelFactory):
     class Meta:
@@ -19,6 +18,7 @@ class UserFactory(DjangoModelFactory):
     username = factory.Sequence(lambda n: f"user{n}")
     password = factory.PostGenerationMethodCall("set_password", "defaultpassword")
     email = factory.Faker("email", locale="nl_NL")
+    is_active = True
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):

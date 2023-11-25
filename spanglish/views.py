@@ -13,8 +13,10 @@ from spanglish.serializers import (
     CategorySerializer,
     WordSerializer,
     SentenceSerializer,
+    TranslationViewSerializer,
     TranslationSerializer,
-    VerbSerializer
+    VerbSerializer,
+    VerbViewSerializer
 )
 from .form import GenerateRandomUserForm
 from .task import create_random_user_accounts
@@ -289,7 +291,7 @@ class TranslationListView(APIView):
 
     def get(self, request, format=None):
         translations = Translation.objects.all()
-        serializer = TranslationSerializer(translations, many=True)
+        serializer = TranslationViewSerializer(translations, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
@@ -309,7 +311,7 @@ class TranslationDetailView(APIView):
     """
     Retrieve, update or delete a translation instance.
     """
-    serializer_class = TranslationSerializer
+    serializer_class = TranslationViewSerializer
 
     def get_object(self, pk):
         try:
@@ -319,7 +321,7 @@ class TranslationDetailView(APIView):
 
     def get(self, request, pk, format=None):
         translation = self.get_object(pk)
-        serializer = TranslationSerializer(translation)
+        serializer = TranslationViewSerializer(translation)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
@@ -351,7 +353,7 @@ class VerbListView(APIView):
 
     def get(self, request, format=None):
         verbs = Verb.objects.all()
-        serializer = VerbSerializer(verbs, many=True)
+        serializer = VerbViewSerializer(verbs, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
@@ -372,7 +374,7 @@ class VerbDetailView(APIView):
     Retrieve, update or delete a verb instance.
     """
 
-    serializer_class = VerbSerializer
+    serializer_class = VerbViewSerializer
 
     def get_object(self, pk):
         try:
@@ -382,7 +384,7 @@ class VerbDetailView(APIView):
 
     def get(self, request, pk, format=None):
         verb = self.get_object(pk)
-        serializer = VerbSerializer(verb)
+        serializer = VerbViewSerializer(verb)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
