@@ -7,15 +7,16 @@ from django.contrib import messages
 from django.views.generic import ListView
 from django.views.generic.edit import FormView
 from django.shortcuts import redirect
-from spanglish.models import Language, Category, Word, Sentence, Translation, VerbTense, Verb
+from spanglish.models import Language, Category, Word, Sentence, Translation, Verb
 from spanglish.serializers import (
     LanguageSerializer,
     CategorySerializer,
     WordSerializer,
     SentenceSerializer,
+    TranslationViewSerializer,
     TranslationSerializer,
-    VerbTenseSerializer,
-    VerbSerializer
+    VerbSerializer,
+    VerbViewSerializer
 )
 from .form import GenerateRandomUserForm
 from .task import create_random_user_accounts
@@ -290,7 +291,7 @@ class TranslationListView(APIView):
 
     def get(self, request, format=None):
         translations = Translation.objects.all()
-        serializer = TranslationSerializer(translations, many=True)
+        serializer = TranslationViewSerializer(translations, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
@@ -310,7 +311,7 @@ class TranslationDetailView(APIView):
     """
     Retrieve, update or delete a translation instance.
     """
-    serializer_class = TranslationSerializer
+    serializer_class = TranslationViewSerializer
 
     def get_object(self, pk):
         try:
@@ -320,7 +321,7 @@ class TranslationDetailView(APIView):
 
     def get(self, request, pk, format=None):
         translation = self.get_object(pk)
-        serializer = TranslationSerializer(translation)
+        serializer = TranslationViewSerializer(translation)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
@@ -342,67 +343,6 @@ class TranslationDetailView(APIView):
         translation.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class VerbTenseListView(APIView):
-    """
-    List all verb tenses, or create a new verb tense.
-    """
-
-    serializer_class = VerbTenseSerializer
-
-    def get(self, request, format=None):
-        verb_tenses = VerbTense.objects.all()
-        serializer = VerbTenseSerializer(verb_tenses, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = VerbTenseSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-class VerbTenseDetailView(APIView):
-    """
-    Retrieve, update or delete a verb tense instance.
-    """
-
-    serializer_class = VerbTenseSerializer
-
-    def get_object(self, pk):
-        try:
-            return VerbTense.objects.get(pk=pk)
-        except VerbTense.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        verb_tense = self.get_object(pk)
-        serializer = VerbTenseSerializer(verb_tense)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        verb_tense = self.get_object(pk)
-        serializer = VerbTenseSerializer(verb_tense, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    def delete(self, request, pk, format=None):
-        verb_tense = self.get_object(pk)
-        verb_tense.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class VerbListView(APIView):
     """
@@ -413,7 +353,7 @@ class VerbListView(APIView):
 
     def get(self, request, format=None):
         verbs = Verb.objects.all()
-        serializer = VerbSerializer(verbs, many=True)
+        serializer = VerbViewSerializer(verbs, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
@@ -434,7 +374,7 @@ class VerbDetailView(APIView):
     Retrieve, update or delete a verb instance.
     """
 
-    serializer_class = VerbSerializer
+    serializer_class = VerbViewSerializer
 
     def get_object(self, pk):
         try:
@@ -444,7 +384,7 @@ class VerbDetailView(APIView):
 
     def get(self, request, pk, format=None):
         verb = self.get_object(pk)
-        serializer = VerbSerializer(verb)
+        serializer = VerbViewSerializer(verb)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):

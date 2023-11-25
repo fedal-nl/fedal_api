@@ -1,6 +1,6 @@
 import logging
 from rest_framework import serializers
-from spanglish.models import Language, Category, Word, Sentence, Translation, VerbTense, Verb
+from spanglish.models import Language, Category, Word, Sentence, Translation, Verb
 
 logger = logging.getLogger(__name__)
 
@@ -24,17 +24,53 @@ class SentenceSerializer(serializers.ModelSerializer):
         model = Sentence
         fields = ['id', 'text', 'language', 'category', 'added_at']
 
+
+class TranslationViewSerializer(serializers.ModelSerializer):
+    
+    word = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='text'
+    )
+    sentence = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='text'
+    )
+
+    class Meta:
+        model = Translation
+        fields = ['id', 'word', 'sentence', 'language', 'translation', 'added_at']
+
+
 class TranslationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Translation
         fields = ['id', 'word', 'sentence', 'language', 'translation', 'added_at']
 
-class VerbTenseSerializer(serializers.ModelSerializer):
+
+class VerbViewSerializer(serializers.ModelSerializer):
+    word = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='text'
+    )
+
     class Meta:
-        model = VerbTense
-        fields = ['id', 'name']
+        model = Verb
+        fields = ['id', 'tense', 'word', 'yo', 'tu', 'usted', 'nosotros', 'vosotros', 'ustedes', 'added_at']
+
 
 class VerbSerializer(serializers.ModelSerializer):
+
+    def validate(self, data):
+        """add a check to ensure that the word category is Verbs"""
+        logger.debug(f"VerbSerializer.validate() data: {data}")
+        if data['word'].category.name != 'Verbs':
+            raise serializers.ValidationError("Word category must be Verbs")
+        return data
+
+
     class Meta:
         model = Verb
         fields = ['id', 'tense', 'word', 'yo', 'tu', 'usted', 'nosotros', 'vosotros', 'ustedes', 'added_at']

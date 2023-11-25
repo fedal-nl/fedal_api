@@ -1,7 +1,7 @@
 from typing import Any
 from django.contrib import messages
 from django.contrib import admin
-from spanglish.models import Language, Category, Word, Sentence, Translation, VerbTense, Verb
+from spanglish.models import Language, Category, Word, Sentence, Translation, Verb
 
 # Register your models here.
 
@@ -19,11 +19,6 @@ class WordAdmin(admin.ModelAdmin):
     list_display = ('text', 'language', 'category', 'added_at', 'id')
     search_fields = ('text',)
     ordering = ('text',)
-
-class VerbTenseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id')
-    search_fields = ('name',)
-    ordering = ('name',)
 
 class VerbAdmin(admin.ModelAdmin):
     list_display = ('tense', 'word', 'yo', 'tu', 'usted', 'nosotros', 'vosotros', 'ustedes', 'added_at', 'id')
@@ -64,5 +59,4 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Word, WordAdmin)
 admin.site.register(Sentence, SentenceAdmin)
 admin.site.register(Translation, TranslationAdmin)
-admin.site.register(VerbTense, VerbTenseAdmin)
 admin.site.register(Verb, VerbAdmin)

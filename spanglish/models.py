@@ -3,27 +3,6 @@ from django.contrib.postgres.fields import ArrayField
 from django_statsd.clients import statsd
 
 
-# class VerbTense(models.TextChoices):
-#     SIMPLE_PRESENT = "SIMPLE_PRESENT", "EL PRESENTE SIMPLE"
-#     SIMPLE_PAST = "SIMPLE_PAST", "EL PASADO SIMPLE"
-#     SIMPLE_FUTURE = "SIMPLE_FUTURE", "EL FUTURO SIMPLE"
-#     PRESENT_CONTINUOUS = "PRESENT_CONTINUOUS", "EL PRESENTE CONTINUO"
-#     PAST_CONTINUOUS = "PAST_CONTINUOUS", "EL PASADO CONTINUO"
-#     FUTURE_CONTINUOUS = "FUTURE_CONTINUOUS", "EL FUTURO CONTINUO"
-#     PRESENT_PERFECT = "PRESENT_PERFECT", "EL PRESENTE PERFECTO"
-#     PAST_PERFECT = "PAST_PERFECT", "EL PASADO PERFECTO"
-#     FUTURE_PERFECT = "FUTURE_PERFECT", "EL FUTURO PERFECTO"
-#     PRESENT_PERFECT_CONTINUOUS = "PRESENT_PERFECT_CONTINUOUS", "EL PRESENTE PERFECTO CONTINUO"
-#     PAST_PERFECT_CONTINUOUS = "PAST_PERFECT_CONTINUOUS", "EL PASADO PERFECTO CONTINUO"
-#     FUTURE_PERFECT_CONTINUOUS = "FUTURE_PERFECT_CONTINUOUS", "EL FUTURO PERFECTO CONTINUO"
-
-class VerbTense(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-
-    def __str__(self):
-        return self.name
-
-
 class Language(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
@@ -67,9 +46,24 @@ class Sentence(models.Model):
             models.Index(fields=['language', 'category']),
         ]
 
+class VerbTenseChoices(models.TextChoices):
+    SIMPLE_PRESENT = "SIMPLE_PRESENT", "EL PRESENTE SIMPLE"
+    SIMPLE_PAST = "SIMPLE_PAST", "EL PASADO SIMPLE"
+    SIMPLE_FUTURE = "SIMPLE_FUTURE", "EL FUTURO SIMPLE"
+    PRESENT_CONTINUOUS = "PRESENT_CONTINUOUS", "EL PRESENTE CONTINUO"
+    PAST_CONTINUOUS = "PAST_CONTINUOUS", "EL PASADO CONTINUO"
+    FUTURE_CONTINUOUS = "FUTURE_CONTINUOUS", "EL FUTURO CONTINUO"
+    PRESENT_PERFECT = "PRESENT_PERFECT", "EL PRESENTE PERFECTO"
+    PAST_PERFECT = "PAST_PERFECT", "EL PASADO PERFECTO"
+    FUTURE_PERFECT = "FUTURE_PERFECT", "EL FUTURO PERFECTO"
+    PRESENT_PERFECT_CONTINUOUS = "PRESENT_PERFECT_CONTINUOUS", "EL PRESENTE PERFECTO CONTINUO"
+    PAST_PERFECT_CONTINUOUS = "PAST_PERFECT_CONTINUOUS", "EL PASADO PERFECTO CONTINUO"
+    FUTURE_PERFECT_CONTINUOUS = "FUTURE_PERFECT_CONTINUOUS", "EL FUTURO PERFECTO CONTINUO"
+
+
 class Verb(models.Model):
 
-    tense = models.ForeignKey(VerbTense, default=1, on_delete=models.CASCADE)
+    tense = models.CharField(max_length=50, choices=VerbTenseChoices.choices)
     word = models.ForeignKey(Word, on_delete=models.CASCADE, related_name='verb')
     yo = models.CharField(max_length=25, blank=True, null=True)
     tu = models.CharField(max_length=25, blank=True, null=True)
@@ -81,6 +75,10 @@ class Verb(models.Model):
 
     class Meta:
         unique_together = (('tense', 'word'),)
+
+
+    def __str__(self):
+        return f"{self.word}"
 
 
 class Translation(models.Model):
