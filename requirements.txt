@@ -4,7 +4,7 @@ astroid==2.15.6
 asttokens==2.2.1
 attrs==23.1.0
 backcall==0.2.0
-backports.zoneinfo==0.2.1
+backports.zoneinfo==0.2.1;python_version<"3.9"
 beautifulsoup4==4.12.2
 billiard==4.1.0
 black==23.11.0
@@ -146,3 +146,4 @@ vine==5.0.0
 watchtower==3.0.0
 wcwidth==0.2.6
 wrapt==1.15.0
+zipp==3.16.2
