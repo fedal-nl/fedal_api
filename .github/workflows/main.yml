@@ -9,5 +9,5 @@ jobs:
       - run: pip install flake8
       - run: python -m pip install --upgrade pip
       - run: pip install -r requirements.txt # install all our dependencies for the project
-      - run: python manage.py test --settings=api.test_settings --parallel auto. # run pytest test
+      - run: python manage.py test --settings=api.test_settings --parallel auto # run pytest test
       - run: flake8 . # run flake8 test
