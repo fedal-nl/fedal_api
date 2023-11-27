@@ -3,11 +3,23 @@ on: [pull_request, push] # activates the workflow when there is a push or pull r
 jobs:
   test_project:
     runs-on: ubuntu-latest # operating system your code will run on
+    services:
+        postgres:
+          image: postgres:latest
+          env:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: Spanglish
+          ports:
+            - 5432:5432
+          # needed because the postgres container does not provide a healthcheck
+          options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
       - run: pip install flake8
       - run: python -m pip install --upgrade pip
       - run: pip install -r requirements.txt # install all our dependencies for the project
+      - run: sudo apt-get install libpq-dev # psycopg2 prerequisites
       - run: python manage.py test --settings=api.test_settings --parallel auto # run pytest test
       - run: flake8 . # run flake8 test
