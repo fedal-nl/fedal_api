@@ -22,7 +22,8 @@ jobs:
       - run: pip install -r requirements.txt # install all our dependencies for the project
       - run: sudo apt-get install libpq-dev # psycopg2 prerequisites
       - run: | 
-            cd api/
+            pwd
+            cd ../api/
             python manage.py migrate
             python manage.py test --settings=api.test_settings --parallel auto # run pytest test
     #   - run: python manage.py test --settings=api.test_settings --parallel auto # run pytest test
