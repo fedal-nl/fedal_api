@@ -9,12 +9,14 @@ class LanguageModelTest(TestCase):
     def test_str(self):
         self.assertEqual(str(self.language), self.language.name)
 
+
 class CategoryModelTest(TestCase):
     def setUp(self):
         self.category = Category.objects.create(name="General")
 
     def test_str(self):
         self.assertEqual(str(self.category), self.category.name)
+
 
 class WordModelTest(TestCase):
     def setUp(self):
@@ -25,6 +27,7 @@ class WordModelTest(TestCase):
     def test_str(self):
         self.assertEqual(str(self.word), self.word.text)
 
+
 class SentenceModelTest(TestCase):
     def setUp(self):
         self.language = Language.objects.create(name="English")
@@ -33,6 +36,7 @@ class SentenceModelTest(TestCase):
 
     def test_str(self):
         self.assertEqual(str(self.sentence), self.sentence.text)
+
 
 class TranslationModelTest(TestCase):
     def setUp(self):

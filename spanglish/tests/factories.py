@@ -2,6 +2,7 @@ import factory
 from factory.django import DjangoModelFactory
 from spanglish.models import Language, Category, Word, Sentence, Translation, Verb
 
+
 class LanguageFactory(DjangoModelFactory):
     """Creates a LanguagFactory object with all possible fields populated."""
 
@@ -10,6 +11,7 @@ class LanguageFactory(DjangoModelFactory):
     class Meta:
         model = Language
 
+
 class CategoryFactory(DjangoModelFactory):
     """Creates a CategoryFactory object with all possible fields populated."""
 
@@ -17,6 +19,7 @@ class CategoryFactory(DjangoModelFactory):
 
     class Meta:
         model = Category
+
 
 class WordFactory(DjangoModelFactory):
     """Creates a WordFactory object with all possible fields populated."""
@@ -28,6 +31,7 @@ class WordFactory(DjangoModelFactory):
     class Meta:
         model = Word
 
+
 class SentenceFactory(DjangoModelFactory):
     """Creates a SentenceFactory object with all possible fields populated."""
 
@@ -37,6 +41,7 @@ class SentenceFactory(DjangoModelFactory):
 
     class Meta:
         model = Sentence
+
 
 class TranslationWordFactory(DjangoModelFactory):
     """Creates a TranslationFactory object with all possible fields populated except sentence."""

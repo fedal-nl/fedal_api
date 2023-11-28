@@ -5,11 +5,14 @@ from django.contrib.auth.models import Group
 
 User = get_user_model()
 
+
 class GroupFactory(DjangoModelFactory):
     name = "test_group"
+
     class Meta:
         model = Group
         django_get_or_create = ("name",)
+
 
 class UserFactory(DjangoModelFactory):
     class Meta:
@@ -31,6 +34,7 @@ class UserFactory(DjangoModelFactory):
         else:
             # Add the user to the test_group by default
             self.groups.add(GroupFactory())
+
 
 # import factories
 # from django.contrib.auth import get_user_model
