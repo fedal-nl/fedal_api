@@ -169,12 +169,8 @@ class SentenceViewsTest(TestCase):
         cls.language = LanguageFactory(name="Spanish")
         cls.category_greeting = CategoryFactory(name="Greeting")
         CategoryFactory(name="Days")
-        SentenceFactory(
-            text="Como estas ?", language=cls.language, category=cls.category_greeting
-        )
-        SentenceFactory(
-            text="Buenos dias", language=cls.language, category=cls.category_greeting
-        )
+        SentenceFactory(text="Como estas ?", language=cls.language, category=cls.category_greeting)
+        SentenceFactory(text="Buenos dias", language=cls.language, category=cls.category_greeting)
 
     def test_get_sentence(self):
         """Test that the sentences are returned correctly"""
@@ -221,21 +217,15 @@ class VerbViewsTest(TestCase):
         cls.category_greeting = CategoryFactory(name="Greetings")
         VerbFactory(
             tense="SIMPLE_PRESENT",
-            word=WordFactory(
-                text="hablar", language=cls.language, category=cls.category_verb
-            ),
+            word=WordFactory(text="hablar", language=cls.language, category=cls.category_verb),
         )
         VerbFactory(
             tense="SIMPLE_PRESENT",
-            word=WordFactory(
-                text="comer", language=cls.language, category=cls.category_verb
-            ),
+            word=WordFactory(text="comer", language=cls.language, category=cls.category_verb),
         )
         VerbFactory(
             tense="SIMPLE_PRESENT",
-            word=WordFactory(
-                text="vivir", language=cls.language, category=cls.category_verb
-            ),
+            word=WordFactory(text="vivir", language=cls.language, category=cls.category_verb),
         )
 
     def test_get_verb(self):
@@ -251,9 +241,7 @@ class VerbViewsTest(TestCase):
     def test_post_verb_success_201(self):
         # excpet a 201 response
 
-        word = WordFactory(
-            text="ser", language=self.language, category=self.category_verb
-        )
+        word = WordFactory(text="ser", language=self.language, category=self.category_verb)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post(
             "/spanglish/verb/",
@@ -273,9 +261,7 @@ class VerbViewsTest(TestCase):
     def test_post_verb_category_word_greeting(self):
         # excpet a 400 response becausse the category is not Verbs
 
-        word = WordFactory(
-            text="Hola", language=self.language, category=self.category_greeting
-        )
+        word = WordFactory(text="Hola", language=self.language, category=self.category_greeting)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post(
             "/spanglish/verb/",
@@ -291,9 +277,7 @@ class VerbViewsTest(TestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response.json(), {"non_field_errors": ["Word category must be Verbs"]}
-        )
+        self.assertEqual(response.json(), {"non_field_errors": ["Word category must be Verbs"]})
 
 
 class TransationViewsTest(TestCase):
@@ -306,20 +290,14 @@ class TransationViewsTest(TestCase):
         cls.language_en = LanguageFactory(name="English")
         cls.category_food = CategoryFactory(name="Food")
         cls.category_greeting = CategoryFactory(name="Greeting")
-        word = WordFactory(
-            text="manzana", language=cls.language_es, category=cls.category_food
-        )
+        word = WordFactory(text="manzana", language=cls.language_es, category=cls.category_food)
         sentence = SentenceFactory(
             text="Como estas ?",
             language=cls.language_es,
             category=cls.category_greeting,
         )
-        TranslationWordFactory(
-            word=word, language=cls.language_en, translation=["apple"]
-        )
-        TranslationSentenceFactory(
-            sentence=sentence, language=cls.language_en, translation=["How are you ?"]
-        )
+        TranslationWordFactory(word=word, language=cls.language_en, translation=["apple"])
+        TranslationSentenceFactory(sentence=sentence, language=cls.language_en, translation=["How are you ?"])
 
     def test_get_translation(self):
         """Test that the translations are returned correctly"""
@@ -328,15 +306,9 @@ class TransationViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 2)
         # self.assertEqual(response.json()[0], {})
-        response_translation_word = [
-            translation["word"] for translation in response.json()
-        ]
-        response_translation_sentence = [
-            translation["sentence"] for translation in response.json()
-        ]
-        response_translation = [
-            translation["translation"] for translation in response.json()
-        ]
+        response_translation_word = [translation["word"] for translation in response.json()]
+        response_translation_sentence = [translation["sentence"] for translation in response.json()]
+        response_translation = [translation["translation"] for translation in response.json()]
         expected_translation = [["apple"], ["How are you ?"]]
         expected_translation_word = ["manzana", None]
         expected_translation_sentence = [None, "Como estas ?"]
@@ -348,9 +320,7 @@ class TransationViewsTest(TestCase):
     def test_post_translation_word_success_201(self):
         # excpet a 201 response
 
-        word = WordFactory(
-            text="naranja", language=self.language_es, category=self.category_food
-        )
+        word = WordFactory(text="naranja", language=self.language_es, category=self.category_food)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post(
             "/spanglish/translation/",

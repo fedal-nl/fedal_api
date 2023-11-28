@@ -16,7 +16,7 @@ from spanglish.serializers import (
     TranslationViewSerializer,
     TranslationSerializer,
     VerbSerializer,
-    VerbViewSerializer
+    VerbViewSerializer,
 )
 from .form import GenerateRandomUserForm
 from .task import create_random_user_accounts
@@ -24,25 +24,27 @@ from .task import create_random_user_accounts
 
 # returns a list of generated user accounts
 class UsersListView(ListView):
-    template_name = 'spanglish/user_list.html'
+    template_name = "spanglish/user_list.html"
     model = User
+
 
 # A page with the form where we can input the number of accounts to generate
 class GenerateRandomUserView(FormView):
-    template_name = 'spanglish/generate_random_user.html'
+    template_name = "spanglish/generate_random_user.html"
     form_class = GenerateRandomUserForm
 
     def form_valid(self, form):
-        total = form.cleaned_data.get('total')
+        total = form.cleaned_data.get("total")
         create_random_user_accounts.delay(total)
-        messages.success(self.request, 'We are generating your random users! Wait a moment and refresh this page.')
-        return redirect('spanglish:users_list')
+        messages.success(self.request, "We are generating your random users! Wait a moment and refresh this page.")
+        return redirect("spanglish:users_list")
 
 
 class LanguageListView(APIView):
     """
     List all languages, or create a new language.
     """
+
     serializer_class = LanguageSerializer
 
     def get(self, request, format=None):
@@ -54,19 +56,15 @@ class LanguageListView(APIView):
         serializer = LanguageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class LanguageDetailView(APIView):
     """
     Retrieve, update or delete a language instance.
     """
+
     serializer_class = LanguageSerializer
 
     def get_object(self, pk):
@@ -85,24 +83,20 @@ class LanguageDetailView(APIView):
         serializer = LanguageSerializer(language, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         language = self.get_object(pk)
         language.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class CategoryListView(APIView):
     """
     List all categories, or create a new category.
     """
+
     serializer_class = CategorySerializer
 
     def get(self, request, format=None):
@@ -114,19 +108,15 @@ class CategoryListView(APIView):
         serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CategoryDetailView(APIView):
     """
     Retrieve, update or delete a category instance.
     """
+
     serializer_class = CategorySerializer
 
     def get_object(self, pk):
@@ -145,19 +135,14 @@ class CategoryDetailView(APIView):
         serializer = CategorySerializer(category, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         category = self.get_object(pk)
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class WordListView(APIView):
     """
@@ -175,19 +160,15 @@ class WordListView(APIView):
         serializer = WordSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class WordDetailView(APIView):
     """
     Retrieve, update or delete a word instance.
     """
+
     serializer_class = WordSerializer
 
     def get_object(self, pk):
@@ -206,19 +187,14 @@ class WordDetailView(APIView):
         serializer = WordSerializer(word, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         word = self.get_object(pk)
         word.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class SentenceListView(APIView):
     """
@@ -236,14 +212,9 @@ class SentenceListView(APIView):
         serializer = SentenceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class SentenceDetailView(APIView):
     """
@@ -268,19 +239,14 @@ class SentenceDetailView(APIView):
         serializer = SentenceSerializer(sentence, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         sentence = self.get_object(pk)
         sentence.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class TranslationListView(APIView):
     """
@@ -298,19 +264,15 @@ class TranslationListView(APIView):
         serializer = TranslationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class TranslationDetailView(APIView):
     """
     Retrieve, update or delete a translation instance.
     """
+
     serializer_class = TranslationViewSerializer
 
     def get_object(self, pk):
@@ -329,14 +291,8 @@ class TranslationDetailView(APIView):
         serializer = TranslationSerializer(translation, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         translation = self.get_object(pk)
@@ -360,14 +316,9 @@ class VerbListView(APIView):
         serializer = VerbSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class VerbDetailView(APIView):
     """
@@ -392,14 +343,8 @@ class VerbDetailView(APIView):
         serializer = VerbSerializer(verb, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
         verb = self.get_object(pk)
