@@ -16,22 +16,23 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt import views as jwt_views
+
 # from rest_framework.schemas import get_schema_view
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
     # API Schema:
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:
-    path('schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path("schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     # AUTHeNTICATION
-    path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
-    path('auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path("api/token/", jwt_views.TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),
+    path("auth/", include("rest_framework.urls", namespace="rest_framework")),
     # ADMIN
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     # SPANGLISH
-    path('spanglish/', include('spanglish.urls')),
+    path("spanglish/", include("spanglish.urls")),
 ]
