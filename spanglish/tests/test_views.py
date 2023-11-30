@@ -1,3 +1,4 @@
+from unittest.mock import patch, Mock
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -32,12 +33,14 @@ class LanguageViewsTest(TestCase):
         expected_languages = {"English", "Spanish"}
         self.assertEqual(response_languages, expected_languages)
 
-    def test_post_language_success(self):
+    @patch("spanglish.tasks.create_language.delay")
+    def test_post_language_success(self, mock_create_language: Mock):
         # excpet a 201 response because the user is authenticated and the
         # language is created
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post("/spanglish/language/", {"name": "French"})
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 202)
+        mock_create_language.assert_called_once()
 
     def test_post_language_401(self):
         # excpet a 401 response because the user is not authenticated
@@ -45,9 +48,8 @@ class LanguageViewsTest(TestCase):
         response = self.client.post("/spanglish/language/", {"name": "French"})
         self.assertEqual(response.status_code, 401)
 
-    def test_post_language_400(self):
-        # excpet a 400 response because the user is authenticated but the
-        # language is not created
+    def test_post_language_400_validation_error(self):
+        # excpet a 400 response because of validation error
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post("/spanglish/language/", {"name": ""})
         self.assertEqual(response.status_code, 400)
@@ -84,7 +86,7 @@ class CategoryViewsTest(TestCase):
         # category is created
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post("/spanglish/category/", {"name": "Colors"})
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 202)
 
     def test_post_category_401(self):
         # excpet a 401 response because the user is not authenticated
@@ -128,23 +130,24 @@ class WordViewsTest(TestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post("/spanglish/word/", {"text": "orange"})
-        expected_response = {"category": ["This field is required."]}
+        expected_response = "'category' is a required property"
         self.assertEqual(response.json(), expected_response)
         self.assertEqual(response.status_code, 400)
 
-    def test_post_word_success_201(self):
+    def test_post_word_success_202(self):
         # excpet a 201 response because the language and category are provided
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post(
             "/spanglish/word/",
             {
-                "text": "naranja",
+                "text": "foo",
                 "category": self.category_food.pk,
                 "language": self.language.pk,
             },
+            format="json",
         )
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 202)
 
     def test_post_word_401(self):
         # excpet a 401 response because the user is not authenticated
@@ -187,12 +190,12 @@ class SentenceViewsTest(TestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post("/spanglish/sentence/", {"text": "Por que no?"})
-        expected_response = {"category": ["This field is required."]}
+        expected_response = "'category' is a required property"
         self.assertEqual(response.json(), expected_response)
         self.assertEqual(response.status_code, 400)
 
-    def test_post_sentence_success_201(self):
-        # excpet a 201 response because the language and category are provided
+    def test_post_sentence_success_202(self):
+        # excpet a 202 response because the language and category are provided
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post(
@@ -202,8 +205,9 @@ class SentenceViewsTest(TestCase):
                 "category": self.category_greeting.pk,
                 "language": self.language.pk,
             },
+            format="json",
         )
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 202)
 
 
 class VerbViewsTest(TestCase):

@@ -175,6 +175,7 @@ LOGGING = {
             "propagate": True,
             "level": "ERROR",
         },
+        "spanglish": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
         # Print queries to console
         # "django.db.backends": {
         #     "level": "DEBUG",

@@ -15,6 +15,4 @@ urlpatterns = [
     path("translation/<int:pk>/detail/", views.TranslationDetailView.as_view(), name="translation-detail"),
     path("verb/", views.VerbListView.as_view(), name="verb-list"),
     path("verb/<int:pk>/detail/", views.VerbDetailView.as_view(), name="verb-detail"),
-    path("users/", views.UsersListView.as_view(), name='users_list'),
-    path("generate/", views.GenerateRandomUserView.as_view(), name='generate')
 ]
