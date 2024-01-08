@@ -26,7 +26,7 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1", "*", "0.0.0.0:1337"]
 
 
 # Application definition
@@ -118,13 +118,20 @@ DATABASES = {
 
 
 # set the celery broker url
-CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_BROKER_URL = "sqs://" if os.environ.get("ENVIRONMENT", "DEV") == "PRO" else "redis://redis:6379/0"
 
 # set the celery result backend
 CELERY_RESULT_BACKEND = "redis://redis:6379/0"
 
 # set the celery timezone
 CELERY_TIMEZONE = "UTC"
+
+# CELERY_BROKER_TRANSPORT_OPTIONS = {
+#     "region": "eu-west-1",
+#     "queue_name_prefix": "c3po-celery-",
+#     "visibility_timeout": 3600,
+# }
+# CELERY_TASK_DEFAULT_QUEUE = "default"
 
 
 # Password validation
@@ -198,7 +205,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = "static/"
+# STATIC
+# ------------------------------------------------------------------------------
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
+# MEDIA
+# ------------------------------------------------------------------------------
+MEDIA_ROOT = os.path.join(BASE_DIR, "media-files")  # on beta doesn't have access rights
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles/")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates/")
+
+# FILE STORAGE
+# ------------------------------------------------------------------------------
+DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -209,12 +232,14 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 APPEND_SLASH = False
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-STATIC_ROOT = "/app/shared/static/"
-MEDIA_ROOT = "/app/shared/media/"
-TEMPLATES_DIR = "/app/shared/templates/"
 
 # JWT SETTINGS
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+# CSRF SETTINGS
+ALLOWED_ORIGINS = ["http://*", "https://*", "http://localhost:1337", "http://0.0.0.0:1337"]
+CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS.copy()
+CSRF_COOKIE_SECURE = True

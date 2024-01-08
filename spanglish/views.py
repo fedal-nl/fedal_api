@@ -17,7 +17,7 @@ from spanglish.serializers import (
     VerbViewSerializer,
 )
 
-from spanglish.tasks import create_language, create_category, create_word, create_sentence
+from spanglish.tasks import create_language, create_category, create_word, create_sentence, create_translation, create_verb
 
 logger = logging.getLogger(__name__)
 
@@ -263,11 +263,14 @@ class TranslationListView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = TranslationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate(request.data, jsonschemas.translation_schema)
+            create_translation.delay(request.data)
+            return Response(status=status.HTTP_202_ACCEPTED)
+
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.message}. Post data was {request.data}")
+            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TranslationDetailView(APIView):
@@ -315,11 +318,13 @@ class VerbListView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = VerbSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate(request.data, jsonschemas.verb_schema)
+            create_verb.delay(request.data)
+            return Response(status=status.HTTP_202_ACCEPTED)
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.message}. Post data was {request.data}")
+            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VerbDetailView(APIView):

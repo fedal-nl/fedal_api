@@ -133,6 +133,7 @@ class VerbTaskTests(TestCase):
         """
         self.language = LanguageFactory(name="English")
         self.category = CategoryFactory(name="Verbs")
+        self.category_greeting = CategoryFactory(name="Greetings")
         self.word = WordFactory(text="be", language=self.language, category=self.category)
 
     def test_create_verb(self):
@@ -155,3 +156,26 @@ class VerbTaskTests(TestCase):
 
         self.assertTrue(response)
         self.assertEqual(total_verbs, 1)
+
+    def test_do_not_create_verb_category_not_verb(self):
+        # excpet a False response becausse the category is not Verbs
+
+        word = WordFactory(text="Hola", language=self.language, category=self.category_greeting)
+        data = (
+            {
+                "tense": "SIMPLE_PRESENT",
+                "word": word.pk,
+                "yo": "voy",
+                "tu": "vas",
+                "usted": "va",
+                "nosotros": "vamos",
+                "vosotros": "vais",
+                "ustedes": "van",
+            },
+        )
+
+        response = tasks.create_verb(data)
+        total_verbs = Verb.objects.count()
+
+        self.assertFalse(response)
+        self.assertEqual(total_verbs, 0)

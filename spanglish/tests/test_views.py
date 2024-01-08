@@ -242,7 +242,7 @@ class VerbViewsTest(TestCase):
         expected_verb = {"hablar", "comer", "vivir"}
         self.assertEqual(response_verb, expected_verb)
 
-    def test_post_verb_success_201(self):
+    def test_post_verb_success_202(self):
         # excpet a 201 response
 
         word = WordFactory(text="ser", language=self.language, category=self.category_verb)
@@ -259,29 +259,9 @@ class VerbViewsTest(TestCase):
                 "vosotros": "vais",
                 "ustedes": "van",
             },
+            format="json",
         )
-        self.assertEqual(response.status_code, 201)
-
-    def test_post_verb_category_word_greeting(self):
-        # excpet a 400 response becausse the category is not Verbs
-
-        word = WordFactory(text="Hola", language=self.language, category=self.category_greeting)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
-        response = self.client.post(
-            "/spanglish/verb/",
-            {
-                "tense": "SIMPLE_PRESENT",
-                "word": word.pk,
-                "yo": "voy",
-                "tu": "vas",
-                "usted": "va",
-                "nosotros": "vamos",
-                "vosotros": "vais",
-                "ustedes": "van",
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json(), {"non_field_errors": ["Word category must be Verbs"]})
+        self.assertEqual(response.status_code, 202)
 
 
 class TransationViewsTest(TestCase):
@@ -321,7 +301,7 @@ class TransationViewsTest(TestCase):
         self.assertEqual(response_translation_word, expected_translation_word)
         self.assertEqual(response_translation_sentence, expected_translation_sentence)
 
-    def test_post_translation_word_success_201(self):
+    def test_post_translation_word_success_202(self):
         # excpet a 201 response
 
         word = WordFactory(text="naranja", language=self.language_es, category=self.category_food)
@@ -334,10 +314,11 @@ class TransationViewsTest(TestCase):
                 "sentence": "",
                 "translation": ["orange"],
             },
+            format="json",
         )
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 202)
 
-    def test_post_translation_sentence_success_201(self):
+    def test_post_translation_sentence_success_202(self):
         # excpet a 201 response
 
         sentence = SentenceFactory(
@@ -354,5 +335,6 @@ class TransationViewsTest(TestCase):
                 "sentence": sentence.pk,
                 "translation": ["Why my firend why"],
             },
+            format="json",
         )
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 202)

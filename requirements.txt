@@ -57,6 +57,8 @@ future==0.18.3
 google-auth==2.22.0
 google-oauth==1.0.1
 greenlet==2.0.2
+gunicorn
+h11==0.14.0
 httplib2==0.22.0
 humanize==4.8.0
 idna==3.4
@@ -139,6 +141,7 @@ tzdata==2023.3
 uritemplate==4.1.1
 urllib3==1.26.16
 uuid==1.30
+uvicorn==0.25.0
 vine==5.0.0
 watchtower==3.0.0
 wcwidth==0.2.6

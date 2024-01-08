@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    networks:
+      - fedal_network
+    volumes:
+      - "./staticfiles:/staticfiles"
+    links:
+      - fedal:fedal
+    depends_on:
+      - fedal
   fedal:
     build:
       context: .
@@ -8,9 +20,11 @@ services:
     container_name: fedal_api
     volumes:
       - ".:/app"
+      - "./staticfiles:/app/staticfiles"
     ports:
-      - 8004:80
+      - 80:80
     command: python manage.py runserver 0.0.0.0:80 
+    # command: uvicorn api.asgi:application --reload --port 80 --host 0.0.0.0
     depends_on:
       - postgresql
       - redis
@@ -34,7 +48,7 @@ services:
   celery:
     build: 
       context: .
-      dockerfile: ./Dockerfile
+      # dockerfile: ./Dockerfile
     command: celery -A api worker --loglevel debug --queues celery --concurrency 8
     volumes:
       - .:/app
@@ -58,7 +72,7 @@ services:
   celery_beat:
     build: 
       context: .
-      dockerfile: ./Dockerfile
+      # dockerfile: ./Dockerfile
     command: celery -A api beat -l DEBUG --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - .:/app
@@ -80,7 +94,7 @@ services:
   flower:
     build: 
       context: .
-      dockerfile: ./Dockerfile
+      # dockerfile: ./Dockerfile
     container_name: fedal_flower
     volumes:
       - .:/app
@@ -157,7 +171,8 @@ volumes:
     app: {}
     db-data: {}
     pgadmin-data: {}
-    fedal-redis: {}    
+    fedal-redis: {}
+    staticfiles: {}
 networks:
     fedal_network:
       ipam:
