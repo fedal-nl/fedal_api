@@ -54,13 +54,6 @@ class LanguageViewsTest(TestCase):
         response = self.client.post("/spanglish/language/", {"name": ""})
         self.assertEqual(response.status_code, 400)
 
-    def test_category_list_view(self):
-        # excpet a 200 response because the user is authenticated and the
-        # language is created
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
-        response = self.client.get("/spanglish/category/")
-        self.assertEqual(response.status_code, 200)
-
 
 class CategoryViewsTest(TestCase):
     def setUp(cls):
@@ -81,12 +74,14 @@ class CategoryViewsTest(TestCase):
         expected_categories = {"Food", "Animals"}
         self.assertEqual(response_categories, expected_categories)
 
-    def test_post_category_success(self):
-        # excpet a 201 response because the user is authenticated and the
-        # category is created
+    @patch("spanglish.tasks.create_category.delay")
+    def test_post_category_success_202(self, mock_create_category: Mock):
+        # excpet a 202 response because the user is authenticated and the
+        # category request is valid
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post("/spanglish/category/", {"name": "Colors"})
         self.assertEqual(response.status_code, 202)
+        mock_create_category.assert_called_once()
 
     def test_post_category_401(self):
         # excpet a 401 response because the user is not authenticated
@@ -100,6 +95,13 @@ class CategoryViewsTest(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post("/spanglish/category/", {"name": ""})
         self.assertEqual(response.status_code, 400)
+
+    def test_category_list_view(self):
+        # excpet a 200 response because the user is authenticated and the
+        # language is created
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
+        response = self.client.get("/spanglish/category/")
+        self.assertEqual(response.status_code, 200)
 
 
 class WordViewsTest(TestCase):
@@ -134,8 +136,9 @@ class WordViewsTest(TestCase):
         self.assertEqual(response.json(), expected_response)
         self.assertEqual(response.status_code, 400)
 
-    def test_post_word_success_202(self):
-        # excpet a 201 response because the language and category are provided
+    @patch("spanglish.tasks.create_word.delay")
+    def test_post_word_success_202(self, mock_create_word: Mock):
+        # excpet a 202 response because the language and category are valid
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post(
@@ -148,6 +151,7 @@ class WordViewsTest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 202)
+        mock_create_word.assert_called_once()
 
     def test_post_word_401(self):
         # excpet a 401 response because the user is not authenticated
@@ -194,8 +198,9 @@ class SentenceViewsTest(TestCase):
         self.assertEqual(response.json(), expected_response)
         self.assertEqual(response.status_code, 400)
 
-    def test_post_sentence_success_202(self):
-        # excpet a 202 response because the language and category are provided
+    @patch("spanglish.tasks.create_sentence.delay")
+    def test_post_sentence_success_202(self, mock_create_sentence: Mock):
+        # excpet a 202 response because the language and category are valid
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.post(
@@ -208,6 +213,7 @@ class SentenceViewsTest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 202)
+        mock_create_sentence.assert_called_once()
 
 
 class VerbViewsTest(TestCase):
@@ -242,8 +248,9 @@ class VerbViewsTest(TestCase):
         expected_verb = {"hablar", "comer", "vivir"}
         self.assertEqual(response_verb, expected_verb)
 
-    def test_post_verb_success_202(self):
-        # excpet a 201 response
+    @patch("spanglish.tasks.create_verb.delay")
+    def test_post_verb_success_202(self, mock_create_verb: Mock):
+        # excpet a 202 response as the verb data is valid
 
         word = WordFactory(text="ser", language=self.language, category=self.category_verb)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
@@ -262,6 +269,7 @@ class VerbViewsTest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 202)
+        mock_create_verb.assert_called_once()
 
 
 class TransationViewsTest(TestCase):
@@ -301,8 +309,9 @@ class TransationViewsTest(TestCase):
         self.assertEqual(response_translation_word, expected_translation_word)
         self.assertEqual(response_translation_sentence, expected_translation_sentence)
 
-    def test_post_translation_word_success_202(self):
-        # excpet a 201 response
+    @patch("spanglish.tasks.create_translation.delay")
+    def test_post_translation_word_success_202(self, mock_create_translation: Mock):
+        # excpet a 202 response because the data is valid
 
         word = WordFactory(text="naranja", language=self.language_es, category=self.category_food)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
@@ -317,9 +326,11 @@ class TransationViewsTest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 202)
+        mock_create_translation.assert_called_once()
 
-    def test_post_translation_sentence_success_202(self):
-        # excpet a 201 response
+    @patch("spanglish.tasks.create_translation.delay")
+    def test_post_translation_sentence_success_202(self, mock_create_translation: Mock):
+        # excpet a 202 response because the sentence translation is valid
 
         sentence = SentenceFactory(
             text="por que amigo por que",
@@ -338,3 +349,4 @@ class TransationViewsTest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 202)
+        mock_create_translation.assert_called_once()
