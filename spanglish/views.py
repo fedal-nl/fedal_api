@@ -1,12 +1,10 @@
+from jsonschema import validate, ValidationError
+from spanglish import jsonschemas
+import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import Http404
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.views.generic import ListView
-from django.views.generic.edit import FormView
-from django.shortcuts import redirect
 from spanglish.models import Language, Category, Word, Sentence, Translation, Verb
 from spanglish.serializers import (
     LanguageSerializer,
@@ -18,26 +16,10 @@ from spanglish.serializers import (
     VerbSerializer,
     VerbViewSerializer,
 )
-from .form import GenerateRandomUserForm
-from .task import create_random_user_accounts
 
+from spanglish.tasks import create_language, create_category, create_word, create_sentence, create_translation, create_verb
 
-# returns a list of generated user accounts
-class UsersListView(ListView):
-    template_name = "spanglish/user_list.html"
-    model = User
-
-
-# A page with the form where we can input the number of accounts to generate
-class GenerateRandomUserView(FormView):
-    template_name = "spanglish/generate_random_user.html"
-    form_class = GenerateRandomUserForm
-
-    def form_valid(self, form):
-        total = form.cleaned_data.get("total")
-        create_random_user_accounts.delay(total)
-        messages.success(self.request, "We are generating your random users! Wait a moment and refresh this page.")
-        return redirect("spanglish:users_list")
+logger = logging.getLogger(__name__)
 
 
 class LanguageListView(APIView):
@@ -53,11 +35,16 @@ class LanguageListView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = LanguageSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # make it an async task, return 400 if the validation doesn't past.
+        # Validate post
+        try:
+            validate(request.data, jsonschemas.language_schema)
+            create_language.delay(request.data)
+            return Response(status=status.HTTP_202_ACCEPTED)
+
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.message}. Post data was {request.data}")
+            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LanguageDetailView(APIView):
@@ -105,11 +92,16 @@ class CategoryListView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = CategorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # make it an async task, return 400 if the validation doesn't past.
+        # Validate post
+        try:
+            validate(request.data, jsonschemas.category_schema)
+            create_category.delay(request.data)
+            return Response(status=status.HTTP_202_ACCEPTED)
+
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.message}. Post data was {request.data}")
+            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryDetailView(APIView):
@@ -157,11 +149,16 @@ class WordListView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = WordSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # make it an async task, return 400 if the validation doesn't past.
+        # Validate post
+        try:
+            validate(request.data, jsonschemas.word_schema)
+            create_word.delay(request.data)
+            return Response(status=status.HTTP_202_ACCEPTED)
+
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.message}. Post data was {request.data}")
+            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WordDetailView(APIView):
@@ -209,11 +206,16 @@ class SentenceListView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = SentenceSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # make it an async task, return 400 if the validation doesn't past.
+        # Validate post
+        try:
+            validate(request.data, jsonschemas.sentence_schema)
+            create_sentence.delay(request.data)
+            return Response(status=status.HTTP_202_ACCEPTED)
+
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.message}. Post data was {request.data}")
+            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SentenceDetailView(APIView):
@@ -261,11 +263,14 @@ class TranslationListView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = TranslationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate(request.data, jsonschemas.translation_schema)
+            create_translation.delay(request.data)
+            return Response(status=status.HTTP_202_ACCEPTED)
+
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.message}. Post data was {request.data}")
+            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TranslationDetailView(APIView):
@@ -313,11 +318,13 @@ class VerbListView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = VerbSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate(request.data, jsonschemas.verb_schema)
+            create_verb.delay(request.data)
+            return Response(status=status.HTTP_202_ACCEPTED)
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.message}. Post data was {request.data}")
+            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VerbDetailView(APIView):

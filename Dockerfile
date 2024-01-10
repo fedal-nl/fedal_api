@@ -46,3 +46,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # copy the content of the current directory to the working directory
 COPY . .
+
+COPY ./entrypoint.sh /
+
+# ENTRYPOINT ["sh", "/entrypoint.sh"]

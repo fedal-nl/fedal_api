@@ -121,6 +121,7 @@ DATABASES = {
 # set the celery broker url
 CELERY_BROKER_URL = "redis://redis:6379/0"
 
+
 # set the celery result backend
 CELERY_RESULT_BACKEND = "redis://redis:6379/0"
 
@@ -175,6 +176,7 @@ LOGGING = {
             "propagate": True,
             "level": "ERROR",
         },
+        "spanglish": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
         # Print queries to console
         # "django.db.backends": {
         #     "level": "DEBUG",
