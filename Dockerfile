@@ -16,37 +16,62 @@ RUN date
 RUN apt-get update \
     && apt-get install -y software-properties-common \
     && add-apt-repository -y ppa:ubuntu-toolchain-r/ppa \
-    # Build deps, will be removed after building
-    # && apt-get install -y gcc linux-libc-dev python3.9-dev python3.9-distutils python3-pip \
-    ## Basics
-    # && apt-get install -y bash nano git \
-    ## Mysql dependencies
-    # && apt-get install -y mysql-client libmysqlclient-dev  \
-    ## Pillow dependencies
-    # && apt-get install -y libjpeg-dev zlib1g \
-    # CFFI dependencies
-    # && apt-get install -y libffi-dev libssl-dev python-cffi libcurl4-openssl-dev \
     && apt-get install -y wget bash nano vim git zip unzip less sqlite3 bsdmainutils bc \
     && apt-get clean
 
-# RUN ln -sf /usr/bin/python3.9 /usr/bin/python
-# RUN ln -sf /usr/bin/pip3 /usr/bin/pip
-# RUN /usr/bin/python -c "import sys;print(f'Python version running on python command: {sys.version}')"
+# create directory for the app user
+# RUN mkdir -p /home/app
 
-# set working directory
-RUN mkdir -p /app
-WORKDIR /app
-ADD . /app/
+
+# create the app user
+# RUN addgroup -S app && adduser -S app -G app
+# Notice that we created a non-root user? By default, 
+# Docker runs container processes as root inside of a container. 
+# This is a bad practice since attackers can gain root access to 
+# the Docker host if they manage to break out of the container. 
+# If you're root in the container, you'll be root on the host.
+
+
+# create the appropriate directories
+ENV APP_HOME=/app
+# ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME
+
+RUN mkdir -p $APP_HOME/staticfiles
+RUN mkdir -p $APP_HOME/mediafiles
+# Docker Compose normally mounts named volumes as root. And since 
+# we're using a non-root user, we'll get a permission denied error 
+# when the collectstatic command is run if the directory does 
+# not already exist
+
+WORKDIR $APP_HOME
 # copy requirements.txt to the current working directory
 COPY requirements.txt ./
-
+# COPY staticfiles/ ./staticfiles/
 # execute the pip install upgrade first and then install requirements
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy the content of the current directory to the working directory
+# copy entrypoint.sh
+COPY ./entrypoint.sh .
+# RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.sh
+
+# RUN chmod +x $APP_HOME/entrypoint.sh
+# RUN ["chmod", "+x", "/app/entrypoint.sh"]
+
+# copy project
 COPY . .
 
-COPY ./entrypoint.sh /
+# chown all the files to the app user
+# RUN chown -R app:app $APP_HOME
 
-# ENTRYPOINT ["sh", "/entrypoint.sh"]
+# change to the app user
+# USER app
+
+# copy the content of the current directory to the working directory
+# COPY . .
+
+# COPY ./entrypoint.sh /
+
+# run entrypoint.sh
+# ENTRYPOINT ["sh", "/app/entrypoint.sh"]

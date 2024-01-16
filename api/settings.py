@@ -240,6 +240,6 @@ SIMPLE_JWT = {
 }
 
 # CSRF SETTINGS
-ALLOWED_ORIGINS = ["http://*", "https://*", "http://localhost:1337", "http://0.0.0.0:1337"]
+ALLOWED_ORIGINS = ["http://*", "https://*", "http://localhost:1337", "http://0.0.0.0:1337", "http://0.0.0.0:8000", "http://0.0.0.0:80"]
 CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS.copy()
 CSRF_COOKIE_SECURE = True
