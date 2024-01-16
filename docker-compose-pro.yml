@@ -1,0 +1,179 @@
+version: '3.8'
+
+services:
+  fedal:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: fedal_api
+    volumes:
+      - staticfiles:/app/staticfiles
+    expose:
+      - 8000 # expose port 8000 to be used by nginx only inside the
+    command: gunicorn --bind 0.0.0.0:8000 api.wsgi:application --reload
+    # command: python manage.py collectstatic --no-input \
+    #          && celery -A api worker --loglevel debug --queues celery --concurrency 8 \
+    #          && celery -A api beat -l DEBUG --scheduler django_celery_beat.schedulers:DatabaseScheduler \
+    #          && celery -A api --broker=redis://redis:6379 flower \
+    # command: python manage.py runserver 0.0.0.0:80 
+    # command: uvicorn api.asgi:application --reload --port 80 --host 0.0.0.0
+    depends_on:
+      - postgresql
+      - redis
+    networks:
+      - fedal_network      
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT}
+      - TESTING=0
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    links:
+      - postgresql
+      - redis
+    env_file:
+      - .env
+  nginx:
+    build: ./nginx
+    restart: always
+    volumes:
+      - staticfiles:/app/staticfiles
+    ports:
+      - 1337:80
+    depends_on:
+      - redis
+      - fedal
+    networks:
+      - fedal_network            
+  celery:
+    build: .
+    command: celery -A api worker --loglevel debug --queues celery --concurrency 8
+    volumes:
+      - .:/app/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=${CELERY_SECRET_KEY}
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    links:
+      - redis
+      - postgresql
+    depends_on: 
+      - fedal
+      - redis
+      - postgresql
+    networks:
+      - fedal_network
+    env_file:
+      - .env 
+  celery_beat:
+    build: .
+    command: celery -A api beat -l DEBUG --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=${CELERY_SECRET_KEY}
+      - DJANGO_ALLOWED_HOSTS=localhost
+    links:
+      - celery
+      - postgresql
+    depends_on: 
+      - celery
+      - redis
+      - postgresql
+    networks:
+      - fedal_network
+    env_file:
+      - .env
+  flower:
+    build: .
+    container_name: fedal_flower
+    volumes:
+      - .:/app/
+    command: celery -A api --broker=redis://redis:6379 flower
+    ports:
+      - 5554:5555
+    links:
+      - celery
+      - redis
+    depends_on:
+      - celery
+      - redis
+    networks:
+      - fedal_network
+    env_file:
+      - .env      
+  postgresql:
+    container_name: fedal_postgresql-api
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - type: volume
+        source: db-data
+        target: /var/lib/postgresql/data
+    networks:
+      fedal_network:
+        ipv4_address: ${POSTGRES_HOST}
+  pgadmin:
+    container_name: fedal_pgadmin
+    image: dpage/pgadmin4:7
+    restart: always
+    networks:
+      - fedal_network
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
+    ports:
+      - "8084:84"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    links:
+      - "postgresql:pgsql-server"
+  redis:
+    container_name: fedal_redis
+    image: redis:alpine
+    restart: always
+    networks:
+      - fedal_network    
+    ports:
+      - "6378:6379"
+    volumes:
+      - "fedal-redis:/data"
+  redis-commander:
+    container_name: fedal_redis-commander
+    image: rediscommander/redis-commander:latest
+    networks:
+      - fedal_network
+    environment:
+      REDIS_HOSTS: redis
+    ports:
+      - 8081:8081
+    depends_on:
+      - redis
+    links:
+      - redis
+volumes:
+    app: {}
+    db-data: {}
+    pgadmin-data: {}
+    fedal-redis: {}
+    staticfiles: {}
+networks:
+    fedal_network:
+      ipam:
+        driver: default
+        config:
+          - subnet: 171.25.0.0/16
