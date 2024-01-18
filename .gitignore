@@ -160,6 +160,5 @@ required_django_commands.txt
 startup.sh
 
 AWS/*
-nginx/*
 staticfiles/*
 entrypoint.sh
